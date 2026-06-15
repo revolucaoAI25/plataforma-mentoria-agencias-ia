@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { BookOpen, Radio, MessageCircle, User, LogOut } from 'lucide-react'
+import { BookOpen, Radio, MessageCircle, User, LogOut, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/types'
@@ -23,70 +23,69 @@ export function Sidebar({ profile }: { profile: Profile | null }) {
     router.push('/login')
   }
 
+  const initials = profile?.full_name?.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() || '?'
+
   return (
     <aside className="w-64 h-screen bg-surface border-r border-border flex flex-col fixed left-0 top-0 z-40">
       {/* Logo */}
-      <div className="p-6 border-b border-border">
+      <div className="p-5 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center font-bold text-white text-lg">
+          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center font-black text-white text-sm tracking-tight glow-green-sm flex-shrink-0">
             LM
           </div>
-          <div>
-            <p className="font-semibold text-white text-sm leading-tight">Lucas Magalhães</p>
-            <p className="text-xs text-primary font-medium tracking-widest uppercase">Mentoria</p>
+          <div className="min-w-0">
+            <p className="font-bold text-white text-sm leading-tight tracking-tight">Lucas Magalhães</p>
+            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-primary opacity-80">Revolução</p>
           </div>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-4 space-y-1">
-        <p className="text-xs text-text-muted font-medium uppercase tracking-widest px-3 pb-2">Sua Jornada</p>
+      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        <p className="text-[10px] font-semibold text-text-muted tracking-[0.15em] uppercase px-3 pt-2 pb-3">Sua Jornada</p>
         {navItems.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(href + '/')
+          const active = pathname === href || (href !== '/' && pathname.startsWith(href + '/'))
           return (
             <Link
               key={href}
               href={href}
               className={cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150',
                 active
-                  ? 'bg-primary-muted text-primary-light border-l-2 border-primary'
-                  : 'text-text-secondary hover:text-white hover:bg-surface-2'
+                  ? 'bg-primary-muted text-primary border-l-2 border-primary pl-[10px]'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-surface-2'
               )}
             >
-              <Icon size={18} />
-              {label}
+              <Icon size={15} strokeWidth={active ? 2.5 : 2} />
+              <span>{label}</span>
             </Link>
           )
         })}
       </nav>
 
-      {/* User */}
-      <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-3 px-2 py-2 mb-2">
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-semibold flex-shrink-0">
-            {profile?.full_name?.[0]?.toUpperCase() || '?'}
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-white truncate">{profile?.full_name || 'Usuário'}</p>
-            <p className="text-xs text-text-muted capitalize">{profile?.role === 'admin' ? 'Administrador' : 'Aluno'}</p>
-          </div>
-        </div>
+      {/* Footer */}
+      <div className="p-3 border-t border-border space-y-0.5">
         {profile?.role === 'admin' && (
           <Link
             href="/admin"
-            className="flex items-center gap-2 px-3 py-2 text-sm text-text-secondary hover:text-white hover:bg-surface-2 rounded-lg transition-colors mb-1"
+            className="flex items-center gap-3 px-3 py-2 text-xs font-semibold text-primary hover:bg-primary-muted rounded-lg transition-colors"
           >
-            Área Admin
+            <Shield size={13} />
+            Painel Admin
           </Link>
         )}
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-2 px-3 py-2 text-sm text-text-secondary hover:text-red-400 hover:bg-surface-2 rounded-lg transition-colors w-full"
-        >
-          <LogOut size={16} />
-          Sair
-        </button>
+        <div className="flex items-center gap-3 px-3 py-2 mt-1">
+          <div className="w-7 h-7 rounded-full bg-primary-muted border border-primary/20 flex items-center justify-center text-primary text-xs font-bold flex-shrink-0">
+            {initials}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-text-primary truncate">{profile?.full_name || 'Usuário'}</p>
+            <p className="text-[10px] text-text-muted capitalize">{profile?.role === 'admin' ? 'Administrador' : 'Aluno'}</p>
+          </div>
+          <button onClick={handleLogout} className="text-text-muted hover:text-red-400 transition-colors flex-shrink-0" title="Sair">
+            <LogOut size={14} />
+          </button>
+        </div>
       </div>
     </aside>
   )

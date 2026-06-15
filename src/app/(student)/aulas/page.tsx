@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getAccessibleMentoriaTypes, getMentoriaLabel } from '@/lib/utils'
 import { MentoriaBadge } from '@/components/ui/badge'
-import { BookOpen, Clock, CheckCircle } from 'lucide-react'
+import { BookOpen, Clock, CheckCircle, ChevronRight } from 'lucide-react'
 import type { MentoriaAccess, MentoriaType, Module, Lesson } from '@/types'
 
 export default async function AulasPage() {
@@ -26,7 +26,7 @@ export default async function AulasPage() {
   const { data: modules } = await supabase
     .from('modules')
     .select('*, lessons(id, title, order_index, duration_minutes, is_published, mentoria_type)')
-    .in('mentoria_type', mentoriaTypes)
+    .in('mentoria_type', mentoriaTypes.length > 0 ? mentoriaTypes : ['__none__'])
     .order('order_index')
 
   const { data: progress } = await supabase
@@ -35,133 +35,158 @@ export default async function AulasPage() {
     .eq('user_id', user.id)
 
   const completedIds = new Set((progress || []).map(p => p.lesson_id))
+  const showMultiple = mentoriaTypes.length > 1
 
   const grouped = mentoriaTypes.reduce((acc, type) => {
     acc[type] = (modules || []).filter(m => m.mentoria_type === type)
     return acc
   }, {} as Record<string, Module[]>)
 
-  const showMultiple = mentoriaTypes.length > 1
-
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="mb-8">
-        <p className="text-xs text-primary font-medium tracking-widest uppercase mb-1">Biblioteca</p>
-        <h1 className="text-4xl font-bold text-white">Conteúdos</h1>
-        <p className="text-text-secondary mt-2">Trilhas estratégicas para construir, operar e escalar sua agência.</p>
+    <div className="min-h-screen">
+      {/* Header */}
+      <div className="px-8 pt-10 pb-8 border-b border-border relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary-muted/20 via-transparent to-transparent pointer-events-none" />
+        <div className="relative max-w-5xl mx-auto">
+          <p className="text-xs font-semibold text-primary tracking-[0.2em] uppercase mb-2">Biblioteca</p>
+          <h1 className="text-4xl font-black text-text-primary tracking-tight mb-2">Conteúdos</h1>
+          <p className="text-text-secondary text-sm">Trilhas estratégicas para construir, operar e escalar sua agência.</p>
+        </div>
       </div>
 
-      {mentoriaTypes.length === 0 && (
-        <div className="text-center py-20 text-text-secondary">
-          <BookOpen size={48} className="mx-auto mb-4 opacity-30" />
-          <p>Você ainda não tem acesso a nenhuma mentoria.</p>
-          <p className="text-sm mt-1">Entre em contato com o suporte.</p>
-        </div>
-      )}
-
-      {mentoriaTypes.map(type => (
-        <div key={type} className="mb-12">
-          {showMultiple && (
-            <div className="flex items-center gap-3 mb-6">
-              <h2 className="text-xl font-bold">{getMentoriaLabel(type)}</h2>
-              <MentoriaBadge type={type} />
+      <div className="px-8 py-8 max-w-5xl mx-auto">
+        {mentoriaTypes.length === 0 && (
+          <div className="text-center py-24">
+            <div className="w-16 h-16 rounded-2xl bg-surface-2 border border-border flex items-center justify-center mx-auto mb-4">
+              <BookOpen size={24} className="text-text-muted" />
             </div>
-          )}
-          {!showMultiple && <h2 className="text-xl font-bold mb-6">Módulos</h2>}
+            <p className="text-text-secondary font-medium">Nenhuma mentoria disponível</p>
+            <p className="text-text-muted text-sm mt-1">Entre em contato com o suporte para obter acesso.</p>
+          </div>
+        )}
 
-          {(grouped[type] || []).length === 0 ? (
-            <p className="text-text-secondary text-sm">Nenhum módulo disponível ainda.</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(grouped[type] || []).map((mod: Module & { lessons?: Lesson[] }, idx: number) => {
-                const lessons = (mod.lessons || []).filter(l => l.is_published)
-                const completed = lessons.filter(l => completedIds.has(l.id)).length
-                const pct = lessons.length ? Math.round((completed / lessons.length) * 100) : 0
+        {mentoriaTypes.map(type => (
+          <div key={type} className="mb-12">
+            {showMultiple && (
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-0.5 h-5 bg-primary rounded-full" />
+                <h2 className="text-lg font-bold text-text-primary tracking-tight">{getMentoriaLabel(type)}</h2>
+                <MentoriaBadge type={type} />
+              </div>
+            )}
+            {!showMultiple && (
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-0.5 h-5 bg-primary rounded-full" />
+                <h2 className="text-lg font-bold text-text-primary tracking-tight">Módulos</h2>
+              </div>
+            )}
 
-                return (
-                  <div key={mod.id} className="bg-surface border border-border rounded-xl overflow-hidden hover:border-primary/40 transition-colors group">
-                    <div className="h-32 bg-gradient-to-br from-surface-2 to-background flex items-end p-5">
-                      <span className="text-5xl font-bold text-primary/60 group-hover:text-primary/80 transition-colors">
-                        {String(idx + 1).padStart(2, '0')}
-                      </span>
-                    </div>
-                    <div className="p-5">
-                      <h3 className="font-semibold text-white mb-1 leading-tight">{mod.title}</h3>
-                      {mod.description && (
-                        <p className="text-text-secondary text-sm mb-4 line-clamp-2">{mod.description}</p>
-                      )}
-                      <div className="flex items-center gap-4 text-xs text-text-muted mb-3">
-                        <span className="flex items-center gap-1">
-                          <BookOpen size={12} />
-                          {lessons.length} aulas
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <CheckCircle size={12} />
-                          {completed}/{lessons.length}
+            {(grouped[type] || []).length === 0 ? (
+              <p className="text-text-muted text-sm pl-4">Nenhum módulo disponível ainda.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {(grouped[type] || []).map((mod: Module & { lessons?: Lesson[] }, idx: number) => {
+                  const lessons = (mod.lessons || []).filter(l => l.is_published)
+                  const completed = lessons.filter(l => completedIds.has(l.id)).length
+                  const pct = lessons.length ? Math.round((completed / lessons.length) * 100) : 0
+
+                  return (
+                    <div key={mod.id} className="group bg-surface border border-border rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-200 hover:shadow-[0_0_24px_rgba(34,197,94,0.07)]">
+                      <div className="h-28 bg-gradient-to-br from-surface-3 via-surface-2 to-surface relative overflow-hidden flex items-end p-5">
+                        <div className="absolute top-4 right-5 opacity-10 group-hover:opacity-20 transition-opacity">
+                          <div className="w-16 h-16 rounded-full border-2 border-primary" />
+                        </div>
+                        <span className="text-5xl font-black text-primary/30 group-hover:text-primary/50 transition-colors leading-none">
+                          {String(idx + 1).padStart(2, '0')}
                         </span>
                       </div>
-                      <div className="w-full h-1 bg-border rounded-full">
-                        <div
-                          className="h-1 bg-primary rounded-full transition-all"
-                          style={{ width: `${pct}%` }}
-                        />
+                      <div className="p-5">
+                        <h3 className="font-bold text-text-primary text-sm mb-1.5 leading-snug">{mod.title}</h3>
+                        {mod.description && (
+                          <p className="text-text-muted text-xs mb-4 line-clamp-2 leading-relaxed">{mod.description}</p>
+                        )}
+                        <div className="flex items-center justify-between text-xs text-text-muted mb-3">
+                          <span className="flex items-center gap-1.5">
+                            <BookOpen size={11} />
+                            {lessons.length} {lessons.length === 1 ? 'aula' : 'aulas'}
+                          </span>
+                          <span className="text-primary font-semibold">{pct}%</span>
+                        </div>
+                        <div className="w-full h-0.5 bg-border rounded-full overflow-hidden">
+                          <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                        </div>
                       </div>
-                      <p className="text-xs text-text-muted mt-1">{pct}% concluído</p>
                     </div>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      ))}
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        ))}
 
-      {/* Aulas section */}
-      <div className="mt-8 border-t border-border pt-8">
-        <h2 className="text-xl font-bold mb-6">Todas as Aulas</h2>
-        <AllLessonsList mentoriaTypes={mentoriaTypes} completedIds={completedIds} />
+        {/* All lessons */}
+        {mentoriaTypes.length > 0 && (
+          <div className="mt-4">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-0.5 h-5 bg-border rounded-full" />
+              <h2 className="text-lg font-bold text-text-primary tracking-tight">Todas as Aulas</h2>
+            </div>
+            <AllLessonsList mentoriaTypes={mentoriaTypes} completedIds={completedIds} showMentoria={showMultiple} />
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-async function AllLessonsList({ mentoriaTypes, completedIds }: { mentoriaTypes: MentoriaType[], completedIds: Set<string> }) {
+async function AllLessonsList({ mentoriaTypes, completedIds, showMentoria }: {
+  mentoriaTypes: MentoriaType[]
+  completedIds: Set<string>
+  showMentoria: boolean
+}) {
   const supabase = await createClient()
   const { data: lessons } = await supabase
     .from('lessons')
-    .select('*, module:modules(title, mentoria_type)')
+    .select('*, module:modules(title)')
     .in('mentoria_type', mentoriaTypes)
     .eq('is_published', true)
+    .order('mentoria_type')
     .order('order_index')
 
-  if (!lessons?.length) return <p className="text-text-secondary text-sm">Nenhuma aula disponível.</p>
+  if (!lessons?.length) return (
+    <p className="text-text-muted text-sm pl-4">Nenhuma aula disponível ainda.</p>
+  )
 
   return (
-    <div className="space-y-2">
-      {lessons.map(lesson => (
-        <Link
-          key={lesson.id}
-          href={`/aulas/${lesson.id}`}
-          className="flex items-center gap-4 p-4 bg-surface border border-border rounded-lg hover:border-primary/40 transition-colors group"
-        >
-          <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${completedIds.has(lesson.id) ? 'bg-primary border-primary' : 'border-border'}`}>
-            {completedIds.has(lesson.id) && <CheckCircle size={14} className="text-white" />}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-white group-hover:text-primary-light transition-colors truncate">{lesson.title}</p>
-            <p className="text-xs text-text-muted">{(lesson as any).module?.title}</p>
-          </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <MentoriaBadge type={lesson.mentoria_type} />
-            {lesson.duration_minutes && (
-              <span className="flex items-center gap-1 text-xs text-text-muted">
-                <Clock size={12} />
-                {lesson.duration_minutes}min
-              </span>
-            )}
-          </div>
-        </Link>
-      ))}
+    <div className="space-y-1">
+      {lessons.map((lesson, i) => {
+        const done = completedIds.has(lesson.id)
+        return (
+          <Link
+            key={lesson.id}
+            href={`/aulas/${lesson.id}`}
+            className="flex items-center gap-4 px-4 py-3.5 rounded-xl hover:bg-surface-2 border border-transparent hover:border-border transition-all group"
+          >
+            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${done ? 'bg-primary border-primary' : 'border-border group-hover:border-primary/40'}`}>
+              {done && <CheckCircle size={11} className="text-white" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-text-secondary group-hover:text-text-primary transition-colors truncate">{lesson.title}</p>
+              <p className="text-xs text-text-muted mt-0.5">{(lesson as any).module?.title}</p>
+            </div>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              {showMentoria && <MentoriaBadge type={lesson.mentoria_type} />}
+              {lesson.duration_minutes && (
+                <span className="flex items-center gap-1 text-xs text-text-muted">
+                  <Clock size={10} />
+                  {lesson.duration_minutes}min
+                </span>
+              )}
+              <span className="text-text-muted text-xs">#{String(i + 1).padStart(2, '0')}</span>
+            </div>
+          </Link>
+        )
+      })}
     </div>
   )
 }

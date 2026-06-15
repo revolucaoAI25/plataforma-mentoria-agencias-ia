@@ -1,45 +1,62 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0A0A0A;
-  --color-surface: #111111;
-  --color-surface-2: #161616;
-  --color-border: #1F1F1F;
+  --color-background: #080808;
+  --color-surface: #0F0F0F;
+  --color-surface-2: #141414;
+  --color-surface-3: #1A1A1A;
+  --color-border: #222222;
+  --color-border-subtle: #1A1A1A;
   --color-primary: #22C55E;
   --color-primary-hover: #16A34A;
   --color-primary-dark: #15803D;
   --color-primary-light: #4ADE80;
-  --color-primary-muted: #14532D;
-  --color-text-primary: #FFFFFF;
+  --color-primary-muted: #052E16;
+  --color-primary-glow: #22C55E26;
+  --color-text-primary: #F5F5F5;
   --color-text-secondary: #A1A1AA;
-  --color-text-muted: #71717A;
+  --color-text-muted: #52525B;
   --font-sans: 'Inter', sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
+
+html { font-size: 15px; }
 
 body {
-  background-color: #0A0A0A;
-  color: #FFFFFF;
+  background-color: #080808;
+  color: #F5F5F5;
   font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar {
-  width: 6px;
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #22C55E; }
+
+/* Selection */
+::selection { background: #22C55E30; color: #4ADE80; }
+
+/* Glow utility */
+.glow-green { box-shadow: 0 0 20px #22C55E20; }
+.glow-green-sm { box-shadow: 0 0 8px #22C55E30; }
+
+/* Animated gradient border */
+.border-gradient {
+  border: 1px solid transparent;
+  background-clip: padding-box;
 }
 
-::-webkit-scrollbar-track {
-  background: #111111;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #1F1F1F;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #22C55E;
+/* Decorative diagonal lines */
+.diagonal-bg {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 40px,
+    rgba(34, 197, 94, 0.015) 40px,
+    rgba(34, 197, 94, 0.015) 41px
+  );
 }
