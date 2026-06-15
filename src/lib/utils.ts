@@ -16,8 +16,8 @@ export function getAccessibleMentoriaTypes(access: MentoriaAccess[]): MentoriaTy
 
 export function getMentoriaLabel(type: string): string {
   const labels: Record<string, string> = {
-    COMERCIAL: 'Mentoria Comercial',
-    ENTREGA: 'Mentoria de Entrega',
+    COMERCIAL: 'Mentoria Comercial — Agência de IA',
+    ENTREGA: 'Mentoria de Desenvolvimento e Entrega de Agentes de IA',
     COMPLETA: 'Mentoria Completa',
     AMBAS: 'Todas as Mentorias',
   }

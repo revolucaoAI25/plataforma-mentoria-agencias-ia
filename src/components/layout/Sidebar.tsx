@@ -35,7 +35,7 @@ export function Sidebar({ profile }: { profile: Profile | null }) {
           </div>
           <div className="min-w-0">
             <p className="font-bold text-white text-sm leading-tight tracking-tight">Lucas Magalhães</p>
-            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-primary opacity-80">Revolução</p>
+            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-primary opacity-80">Revolução AI</p>
           </div>
         </div>
       </div>

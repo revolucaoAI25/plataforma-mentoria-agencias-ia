@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Modal, FormField } from '@/components/ui/modal'
 import { MentoriaBadge } from '@/components/ui/badge'
-import { Plus, Pencil, Trash2, Paperclip, Link as LinkIcon, FileText, X } from 'lucide-react'
+import { Plus, Pencil, Trash2, Paperclip, Link as LinkIcon, FileText, X, Clock } from 'lucide-react'
 
 type Lesson = {
   id: string; module_id: string; mentoria_type: string; title: string
@@ -18,6 +18,7 @@ type Lesson = {
 }
 type Module = { id: string; title: string; mentoria_type: string }
 type Material = { id: string; lesson_id: string; title: string; type: string; url: string }
+type MaterialDraft = { title: string; type: string; url: string }
 
 const emptyLesson = { module_id: '', mentoria_type: 'COMERCIAL', title: '', description: '', panda_video_id: '', order_index: 0, duration_minutes: '' as string | number, is_published: true }
 const emptyMaterial = { title: '', type: 'link', url: '' }
@@ -26,6 +27,8 @@ export function AulasAdminClient({ lessons, modules }: { lessons: Lesson[]; modu
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<Lesson | null>(null)
   const [form, setForm] = useState(emptyLesson)
+  const [draftMaterials, setDraftMaterials] = useState<MaterialDraft[]>([])
+  const [matDraftForm, setMatDraftForm] = useState(emptyMaterial)
   const [managingMaterials, setManagingMaterials] = useState<Lesson | null>(null)
   const [materials, setMaterials] = useState<Material[]>([])
   const [matForm, setMatForm] = useState(emptyMaterial)
@@ -34,10 +37,19 @@ export function AulasAdminClient({ lessons, modules }: { lessons: Lesson[]; modu
   const router = useRouter()
   const supabase = createClient()
 
-  const openCreate = () => { setEditing(null); setForm(emptyLesson); setShowForm(true) }
+  const openCreate = () => {
+    setEditing(null)
+    setForm(emptyLesson)
+    setDraftMaterials([])
+    setMatDraftForm(emptyMaterial)
+    setShowForm(true)
+  }
+
   const openEdit = (l: Lesson) => {
     setEditing(l)
     setForm({ module_id: l.module_id, mentoria_type: l.mentoria_type, title: l.title, description: l.description || '', panda_video_id: l.panda_video_id || '', order_index: l.order_index, duration_minutes: l.duration_minutes || '', is_published: l.is_published })
+    setDraftMaterials([])
+    setMatDraftForm(emptyMaterial)
     setShowForm(true)
   }
 
@@ -47,14 +59,31 @@ export function AulasAdminClient({ lessons, modules }: { lessons: Lesson[]; modu
     setMaterials(data || [])
   }
 
+  const addDraftMaterial = () => {
+    if (!matDraftForm.title || !matDraftForm.url) return
+    setDraftMaterials(prev => [...prev, { ...matDraftForm }])
+    setMatDraftForm(emptyMaterial)
+  }
+
+  const removeDraftMaterial = (idx: number) => {
+    setDraftMaterials(prev => prev.filter((_, i) => i !== idx))
+  }
+
   const save = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     const payload = { ...form, duration_minutes: form.duration_minutes ? Number(form.duration_minutes) : null, panda_video_id: (form.panda_video_id as string).trim() || null, description: (form.description as string).trim() || null }
     if (editing) {
       await supabase.from('lessons').update(payload).eq('id', editing.id)
+      // Insert any new draft materials for edited lesson
+      if (draftMaterials.length > 0) {
+        await supabase.from('lesson_materials').insert(draftMaterials.map(m => ({ lesson_id: editing.id, ...m })))
+      }
     } else {
-      await supabase.from('lessons').insert(payload)
+      const { data: newLesson } = await supabase.from('lessons').insert(payload).select().single()
+      if (newLesson && draftMaterials.length > 0) {
+        await supabase.from('lesson_materials').insert(draftMaterials.map(m => ({ lesson_id: newLesson.id, ...m })))
+      }
     }
     setLoading(false)
     setShowForm(false)
@@ -85,6 +114,8 @@ export function AulasAdminClient({ lessons, modules }: { lessons: Lesson[]; modu
   const filteredModules = modules.filter(m => m.mentoria_type === form.mentoria_type)
 
   const typeIcon = (type: string) => type === 'pdf' || type === 'file' ? <FileText size={13} className="text-primary" /> : <LinkIcon size={13} className="text-primary" />
+
+  const isComingSoon = (l: Lesson) => l.is_published && !l.panda_video_id
 
   return (
     <>
@@ -124,9 +155,15 @@ export function AulasAdminClient({ lessons, modules }: { lessons: Lesson[]; modu
                     }
                   </td>
                   <td className="py-3 px-4">
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded ${l.is_published ? 'text-primary bg-primary-muted' : 'text-text-muted bg-surface-3'}`}>
-                      {l.is_published ? 'Publicada' : 'Oculta'}
-                    </span>
+                    {isComingSoon(l) ? (
+                      <span className="text-xs font-medium px-2 py-0.5 rounded text-yellow-400 bg-yellow-950/40 flex items-center gap-1 w-fit">
+                        <Clock size={10} />Em Breve
+                      </span>
+                    ) : (
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded ${l.is_published ? 'text-primary bg-primary-muted' : 'text-text-muted bg-surface-3'}`}>
+                        {l.is_published ? 'Publicada' : 'Oculta'}
+                      </span>
+                    )}
                   </td>
                   <td className="py-3 px-4">
                     <div className="flex gap-1 justify-end">
@@ -164,7 +201,7 @@ export function AulasAdminClient({ lessons, modules }: { lessons: Lesson[]; modu
           <FormField label="Título da Aula">
             <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Ex: Aula 01 — O Modelo de Aquisição" required />
           </FormField>
-          <FormField label="Panda Video ID" hint="Cole aqui o ID do vídeo (parte final da URL do embed no Panda Video)">
+          <FormField label="Panda Video ID" hint="Cole o ID do vídeo. Deixe em branco para marcar a aula como Em Breve.">
             <Input value={form.panda_video_id as string} onChange={e => setForm(f => ({ ...f, panda_video_id: e.target.value }))} placeholder="Ex: 8a7b6c5d-4e3f-2a1b-0c9d-8e7f6a5b4c3d" className="font-mono text-xs" />
           </FormField>
           <FormField label="Descrição">
@@ -182,9 +219,55 @@ export function AulasAdminClient({ lessons, modules }: { lessons: Lesson[]; modu
             <input type="checkbox" checked={form.is_published} onChange={e => setForm(f => ({ ...f, is_published: e.target.checked }))} className="w-4 h-4 rounded accent-primary" />
             <div>
               <p className="text-sm font-medium text-text-primary">Aula publicada</p>
-              <p className="text-xs text-text-muted">Visível para os alunos na biblioteca</p>
+              <p className="text-xs text-text-muted">
+                {form.is_published && !(form.panda_video_id as string).trim()
+                  ? 'Aparece como "Em Breve" (sem vídeo)'
+                  : 'Visível para os alunos na biblioteca'}
+              </p>
             </div>
           </label>
+
+          {/* Inline materials */}
+          <div className="border border-border rounded-lg p-4 space-y-3">
+            <p className="text-xs font-semibold text-text-secondary uppercase tracking-widest flex items-center gap-2">
+              <Paperclip size={12} />Materiais
+            </p>
+            {draftMaterials.length > 0 && (
+              <div className="space-y-2">
+                {draftMaterials.map((m, idx) => (
+                  <div key={idx} className="flex items-center gap-3 p-2.5 bg-surface-2 border border-border rounded-lg">
+                    {typeIcon(m.type)}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-text-primary truncate">{m.title}</p>
+                      <p className="text-xs text-text-muted truncate">{m.url}</p>
+                    </div>
+                    <button type="button" onClick={() => removeDraftMaterial(idx)} className="text-text-muted hover:text-red-400 transition-colors flex-shrink-0">
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {editing && (
+              <p className="text-xs text-text-muted">Materiais existentes são gerenciados pelo ícone <Paperclip size={10} className="inline" /> na tabela.</p>
+            )}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="col-span-2">
+                <Input value={matDraftForm.title} onChange={e => setMatDraftForm(f => ({ ...f, title: e.target.value }))} placeholder="Nome do material" className="text-sm" />
+              </div>
+              <select value={matDraftForm.type} onChange={e => setMatDraftForm(f => ({ ...f, type: e.target.value }))}
+                className="h-10 px-3 rounded-lg bg-surface-2 border border-border text-text-primary text-sm font-medium focus:outline-none focus:border-primary/60 transition-all">
+                <option value="link">Link</option>
+                <option value="pdf">PDF</option>
+                <option value="file">Arquivo</option>
+              </select>
+            </div>
+            <div className="flex gap-2">
+              <Input value={matDraftForm.url} onChange={e => setMatDraftForm(f => ({ ...f, url: e.target.value }))} placeholder="https://..." className="flex-1 text-sm" />
+              <Button type="button" size="sm" variant="ghost" onClick={addDraftMaterial}><Plus size={13} />Adicionar</Button>
+            </div>
+          </div>
+
           <div className="flex gap-2 justify-end pt-2 border-t border-border">
             <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>Cancelar</Button>
             <Button type="submit" disabled={loading}>{loading ? 'Salvando...' : editing ? 'Salvar Alterações' : 'Criar Aula'}</Button>

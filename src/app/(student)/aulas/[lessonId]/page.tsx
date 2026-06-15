@@ -6,7 +6,7 @@ import { PandaEmbed } from '@/components/lessons/VideoPlayer'
 import { LessonComments } from '@/components/lessons/LessonComments'
 import { CompleteButton } from '@/components/lessons/CompleteButton'
 import { MentoriaBadge } from '@/components/ui/badge'
-import { CheckCircle, FileText, Link as LinkIcon, ArrowLeft } from 'lucide-react'
+import { CheckCircle, FileText, Link as LinkIcon, ArrowLeft, Clock } from 'lucide-react'
 import { getMentoriaLabel } from '@/lib/utils'
 import type { LessonComment } from '@/types'
 
@@ -70,11 +70,23 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
         <div className="flex gap-8">
           {/* Main content */}
           <div className="flex-1 min-w-0">
-            <PandaEmbed videoId={lesson.panda_video_id || ''} />
+            {lesson.panda_video_id ? (
+              <PandaEmbed videoId={lesson.panda_video_id} />
+            ) : (
+              <div className="aspect-video bg-surface-2 border border-border rounded-xl flex flex-col items-center justify-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-primary-muted border border-primary/20 flex items-center justify-center">
+                  <Clock size={28} className="text-primary" />
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-bold text-text-primary">Em Breve</p>
+                  <p className="text-sm text-text-muted mt-1">Este conteúdo estará disponível em breve.</p>
+                </div>
+              </div>
+            )}
 
             <div className="flex items-center gap-3 mt-4 mb-6">
               <MentoriaBadge type={lesson.mentoria_type} />
-              <CompleteButton lessonId={lessonId} completed={completed} />
+              {lesson.panda_video_id && <CompleteButton lessonId={lessonId} completed={completed} />}
             </div>
 
             {lesson.description && (

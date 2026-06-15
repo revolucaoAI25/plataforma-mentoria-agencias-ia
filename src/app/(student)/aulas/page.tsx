@@ -91,7 +91,7 @@ export default async function AulasPage() {
                   const pct = lessons.length ? Math.round((completed / lessons.length) * 100) : 0
 
                   return (
-                    <div key={mod.id} className="group bg-surface border border-border rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-200 hover:shadow-[0_0_24px_rgba(34,197,94,0.07)]">
+                    <Link key={mod.id} href={`/modulos/${mod.id}`} className="group bg-surface border border-border rounded-xl overflow-hidden hover:border-primary/30 transition-all duration-200 hover:shadow-[0_0_24px_rgba(34,197,94,0.07)]">
                       <div className="h-28 bg-gradient-to-br from-surface-3 via-surface-2 to-surface relative overflow-hidden flex items-end p-5">
                         <div className="absolute top-4 right-5 opacity-10 group-hover:opacity-20 transition-opacity">
                           <div className="w-16 h-16 rounded-full border-2 border-primary" />
@@ -116,7 +116,7 @@ export default async function AulasPage() {
                           <div className="h-full bg-primary rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   )
                 })}
               </div>

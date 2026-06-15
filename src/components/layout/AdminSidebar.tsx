@@ -33,7 +33,7 @@ export function AdminSidebar() {
           </div>
           <div>
             <p className="font-bold text-white text-sm leading-tight tracking-tight">Painel Admin</p>
-            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-primary opacity-80">Revolução</p>
+            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-primary opacity-80">Revolução AI</p>
           </div>
         </div>
       </div>
