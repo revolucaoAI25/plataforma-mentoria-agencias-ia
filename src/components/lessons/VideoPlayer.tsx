@@ -4,7 +4,7 @@ export function VideoPlayer({ videoId }: { videoId: string }) {
   return (
     <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden">
       <iframe
-        src={`https://player-vz-xxxxxxxx.tv.pandavideo.com.br/embed/?v=${videoId}`}
+        src={`https://player-vz-36d798a8-547.tv.pandavideo.com.br/embed/?v=${videoId}`}
         className="absolute inset-0 w-full h-full"
         allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
         allowFullScreen
