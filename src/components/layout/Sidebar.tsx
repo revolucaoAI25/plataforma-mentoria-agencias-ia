@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { BookOpen, Radio, MessageCircle, User, LogOut, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
+import { DoubleLogo } from '@/components/ui/DoubleLogo'
 import type { Profile } from '@/types'
 
 const navItems = [
@@ -30,9 +31,7 @@ export function Sidebar({ profile }: { profile: Profile | null }) {
       {/* Logo */}
       <div className="p-5 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center font-black text-white text-sm tracking-tight glow-green-sm flex-shrink-0">
-            LM
-          </div>
+          <DoubleLogo size={36} />
           <div className="min-w-0">
             <p className="font-bold text-white text-sm leading-tight tracking-tight">Lucas Magalhães</p>
             <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-primary opacity-80">Revolução AI</p>

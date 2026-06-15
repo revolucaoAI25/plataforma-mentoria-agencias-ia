@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { DoubleLogo } from '@/components/ui/DoubleLogo'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -36,9 +37,7 @@ export default function LoginPage() {
 
         <div className="relative">
           <div className="flex items-center gap-3 mb-16">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center font-black text-white text-base glow-green-sm">
-              LM
-            </div>
+            <DoubleLogo size={40} />
             <div>
               <p className="font-bold text-white text-sm tracking-tight">Lucas Magalhães</p>
               <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-primary">Revolução AI</p>
