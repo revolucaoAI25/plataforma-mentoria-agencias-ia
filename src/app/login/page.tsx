@@ -41,22 +41,26 @@ export default function LoginPage() {
             </div>
             <div>
               <p className="font-bold text-white text-sm tracking-tight">Lucas Magalhães</p>
-              <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-primary">Revolução</p>
+              <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-primary">Revolução AI</p>
             </div>
           </div>
 
           <div>
             <p className="text-4xl font-black text-white leading-tight tracking-tight mb-4">
-              A máquina<br />de aquisição<br /><span className="text-primary">começa aqui.</span>
+              Construa sua<br />agência de IA<br /><span className="text-primary">do zero ao topo.</span>
             </p>
             <p className="text-text-secondary text-sm leading-relaxed">
-              Acesse sua plataforma de mentoria e construa uma operação de vendas escalável.
+              Tudo o que você precisa para criar, vender e entregar agentes de inteligência artificial — em um único lugar.
             </p>
           </div>
         </div>
 
         <div className="relative space-y-4">
-          {['Módulos estratégicos estruturados', 'Lives ao vivo gravadas', 'Suporte direto com a equipe'].map(item => (
+          {[
+            'Venda, precifique e posicione sua agência',
+            'Desenvolva e entregue agentes de IA',
+            'Lives, suporte e acompanhamento direto',
+          ].map(item => (
             <div key={item} className="flex items-center gap-3">
               <div className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
               <p className="text-sm text-text-secondary">{item}</p>
