@@ -23,12 +23,14 @@ export async function POST(request: Request) {
   const { bookingId } = await request.json()
   if (!bookingId) return NextResponse.json({ error: 'bookingId obrigatório' }, { status: 400 })
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('mentoring_bookings')
     .update({ status: 'cancelled' })
     .eq('id', bookingId)
     .eq('user_id', user.id)
+    .select('id')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  if (!data || data.length === 0) return NextResponse.json({ error: 'Agendamento não encontrado' }, { status: 404 })
   return NextResponse.json({ success: true })
 }

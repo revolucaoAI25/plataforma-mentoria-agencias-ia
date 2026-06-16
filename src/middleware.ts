@@ -34,7 +34,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/aulas', request.url))
   }
 
-  if (user && path.startsWith('/admin')) {
+  if (user && (path.startsWith('/admin') || path.startsWith('/api/admin'))) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
