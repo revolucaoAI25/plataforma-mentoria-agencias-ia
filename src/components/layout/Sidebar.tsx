@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { BookOpen, Radio, MessageCircle, User, LogOut, Shield } from 'lucide-react'
+import { BookOpen, Radio, MessageCircle, User, LogOut, Shield, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { DoubleLogo } from '@/components/ui/DoubleLogo'
@@ -10,6 +10,7 @@ import type { Profile } from '@/types'
 const navItems = [
   { href: '/aulas', label: 'Aulas', icon: BookOpen },
   { href: '/lives', label: 'Lives', icon: Radio },
+  { href: '/agenda', label: 'Agenda', icon: Calendar },
   { href: '/suporte', label: 'Suporte', icon: MessageCircle },
   { href: '/perfil', label: 'Perfil', icon: User },
 ]

@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, BookOpen, Layers, Radio, Users, MessageCircle, LogOut, ArrowLeft } from 'lucide-react'
+import { LayoutDashboard, BookOpen, Layers, Radio, Users, MessageCircle, LogOut, ArrowLeft, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { DoubleLogo } from '@/components/ui/DoubleLogo'
@@ -11,6 +11,7 @@ const navItems = [
   { href: '/admin/modulos', label: 'Módulos', icon: Layers },
   { href: '/admin/aulas', label: 'Aulas', icon: BookOpen },
   { href: '/admin/lives', label: 'Lives', icon: Radio },
+  { href: '/admin/agenda', label: 'Agenda', icon: Calendar },
   { href: '/admin/alunos', label: 'Alunos', icon: Users },
   { href: '/admin/suporte', label: 'Suporte', icon: MessageCircle },
 ]
