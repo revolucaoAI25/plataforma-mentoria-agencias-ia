@@ -50,20 +50,20 @@ export async function POST(request: Request) {
     usedCount = bkgs.length
   } else if (quotaPeriod === 'monthly') {
     usedCount = bkgs.filter(b => {
-      const slotData = b.slot as { starts_at: string } | null
+      const slotData = b.slot as unknown as { starts_at: string } | null
       const d = new Date(slotData?.starts_at || '')
       return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()
     }).length
   } else if (quotaPeriod === 'semester') {
     const semStart = now.getMonth() < 6 ? 0 : 6
     usedCount = bkgs.filter(b => {
-      const slotData = b.slot as { starts_at: string } | null
+      const slotData = b.slot as unknown as { starts_at: string } | null
       const d = new Date(slotData?.starts_at || '')
       return d.getFullYear() === now.getFullYear() && d.getMonth() >= semStart && d.getMonth() < semStart + 6
     }).length
   } else if (quotaPeriod === 'yearly') {
     usedCount = bkgs.filter(b => {
-      const slotData = b.slot as { starts_at: string } | null
+      const slotData = b.slot as unknown as { starts_at: string } | null
       const d = new Date(slotData?.starts_at || '')
       return d.getFullYear() === now.getFullYear()
     }).length
